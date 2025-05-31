@@ -1,0 +1,3 @@
+# requirements.txt for tinybwmon
+Flask
+speedtest-cli
