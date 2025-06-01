@@ -63,8 +63,15 @@ init_db()
 def insert_result(download, upload, ping):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
+    # Insert the new result
     c.execute('INSERT INTO results (timestamp, download, upload, ping) VALUES (?, ?, ?, ?)',
               (datetime.now(), download, upload, ping))
+    conn.commit()
+
+    # Implement round-robin logic for each interval
+    for interval_name, minutes in INTERVALS.items():
+        since = datetime.now() - timedelta(minutes=minutes)
+        c.execute('DELETE FROM results WHERE timestamp < ?', (since,))
     conn.commit()
     conn.close()
 
