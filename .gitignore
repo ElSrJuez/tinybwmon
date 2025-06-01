@@ -68,6 +68,7 @@ Pipfile.lock
 
 # SQLite database
 speedtest_results.db
+data/speedtest_results.db
 
 # OS files
 .DS_Store
@@ -141,3 +142,4 @@ cython_debug/
 .cursorindexingignore
 
 compose.yaml
+Dockerfile

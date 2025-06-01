@@ -41,7 +41,7 @@ INTERVALS = {
 }
 
 app = Flask(__name__)
-DB_PATH = 'speedtest_results.db'
+DB_PATH = 'data/speedtest_results.db'
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
@@ -151,6 +151,3 @@ def scheduled_speedtest():
 
 # Start the background thread when the app starts
 threading.Thread(target=scheduled_speedtest, daemon=True).start()
-
-if __name__ == '__main__':
-    app.run(debug=True, port=42042)
