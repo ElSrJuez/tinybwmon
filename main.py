@@ -153,4 +153,4 @@ def scheduled_speedtest():
 threading.Thread(target=scheduled_speedtest, daemon=True).start()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=42042)

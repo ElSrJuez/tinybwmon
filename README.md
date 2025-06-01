@@ -27,7 +27,7 @@ pip install -r requirements.txt
 ```powershell
 python main.py
 ```
-Visit [http://127.0.0.1:5000/](http://127.0.0.1:5000/) in your browser.
+Visit [http://127.0.0.1:42042/](http://127.0.0.1:42042/) in your browser.
 
 ### Endpoints
 - `/` — Home/info and status dashboard
@@ -41,13 +41,14 @@ Edit `config.ini` to change interval durations for charting, or set environment 
 To configure the background speed test cadence, set `test_interval_minutes` in the `[scheduler]` section of `config.ini` or use the `TEST_INTERVAL_MINUTES` environment variable.
 
 ## Data Retention and Storage
-**Note:** Despite the original intent, the current implementation does NOT use a true round-robin/circular buffer for data storage. All results are appended to the database indefinitely. When querying for an interval, results are filtered by timestamp, but old data is not automatically deleted or overwritten. This means the database will grow over time unless you manually prune it.
+**Note:** The current implementation uses a round-robin/circular buffer for data storage, ensuring the database does not grow indefinitely.
 
 ## Roadmap
 - [x] Configurable chart intervals and test cadence
 - [x] Automated background speed tests
 - [x] REST API for results and manual test trigger
 - [x] Basic web UI for charting results and status
+- [x] Round-robin storage logic
 - [ ] Docker support for easy deployment
 - [ ] Logging and error reporting improvements
 - [ ] Optional authentication/rate limiting for endpoints

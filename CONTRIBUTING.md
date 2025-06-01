@@ -25,8 +25,11 @@ By contributing, you agree that your contributions will be licensed under the MI
 
 ## Community
 - Be respectful and constructive in all interactions.
-- See [CODE_OF_CONDUCT.md](https://github.com/ElSrJuez/tinybwmon/blob/main/CODE_OF_CONDUCT.md) for our code of conduct (if available).
+- See [CODE_OF_CONDUCT.md](https://github.com/ElSrJuez/tinybwmon/blob/main/CODE_OF_CONDUCT.md) for our code of conduct.
 
 ---
+
+### Current Branch
+You are working on the `change-port-number` branch, which updates the Flask app to run on port `42042`. Ensure your changes align with this branch's purpose.
 
 Thank you for helping make tinybwmon better!
