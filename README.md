@@ -8,6 +8,7 @@ A minimal Flask app to monitor and chart your internet bandwidth using speedtest
 - Configurable intervals for last hour, 24 hours, 7 days, and month
 - Simple API endpoints for running tests and retrieving results
 - Automated background speed tests at a configurable cadence
+- DHTML web UI for results and status
 
 ## Requirements
 - Python 3.8+
@@ -29,23 +30,28 @@ python main.py
 Visit [http://127.0.0.1:5000/](http://127.0.0.1:5000/) in your browser.
 
 ### Endpoints
-- `/` — Home/info
+- `/` — Home/info and status dashboard
 - `/run_test` — Run a speed test and store the result
 - `/results/<interval>` — Get results for a given interval (`last_hour`, `last_24_hours`, `last_7_days`, `last_month`)
+- `/view/<interval>` — DHTML chart for a given interval
 
 ## Configuration
 Edit `config.ini` to change interval durations for charting, or set environment variables (e.g., `LAST_HOUR`).
 
 To configure the background speed test cadence, set `test_interval_minutes` in the `[scheduler]` section of `config.ini` or use the `TEST_INTERVAL_MINUTES` environment variable.
 
+## Data Retention and Storage
+**Note:** Despite the original intent, the current implementation does NOT use a true round-robin/circular buffer for data storage. All results are appended to the database indefinitely. When querying for an interval, results are filtered by timestamp, but old data is not automatically deleted or overwritten. This means the database will grow over time unless you manually prune it.
+
 ## Roadmap
 - [x] Configurable chart intervals and test cadence
 - [x] Automated background speed tests
 - [x] REST API for results and manual test trigger
-- [ ] Basic web UI for charting results
+- [x] Basic web UI for charting results and status
 - [ ] Docker support for easy deployment
 - [ ] Logging and error reporting improvements
 - [ ] Optional authentication/rate limiting for endpoints
+- [ ] **True round-robin/circular buffer storage** (future improvement)
 
 ## Contributing
 Contributions are welcome! Please open issues or pull requests for bug fixes, features, or suggestions. See [CONTRIBUTING.md](CONTRIBUTING.md) if available.
