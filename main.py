@@ -7,6 +7,8 @@ from flask import Flask, render_template, request, jsonify
 import sqlite3
 from datetime import datetime, timedelta
 import speedtest
+import threading
+import time
 
 # Load intervals from config file or environment variables
 config = configparser.ConfigParser()
@@ -100,6 +102,38 @@ def get_results(interval):
         for row in rows
     ]
     return jsonify(results)
+
+def get_scheduler_interval():
+    env_val = os.getenv('TEST_INTERVAL_MINUTES')
+    if env_val is not None:
+        try:
+            return int(env_val)
+        except ValueError:
+            pass
+    if config.has_option('scheduler', 'test_interval_minutes'):
+        try:
+            return int(config.get('scheduler', 'test_interval_minutes'))
+        except ValueError:
+            pass
+    return 1  # default to 1 minute
+
+SCHEDULER_INTERVAL_MINUTES = get_scheduler_interval()
+
+def scheduled_speedtest():
+    while True:
+        try:
+            st = speedtest.Speedtest()
+            st.get_best_server()
+            download = st.download() / 1_000_000  # Mbps
+            upload = st.upload() / 1_000_000    # Mbps
+            ping = st.results.ping
+            insert_result(download, upload, ping)
+        except Exception as e:
+            print(f"Scheduled speedtest error: {e}")
+        time.sleep(60 * SCHEDULER_INTERVAL_MINUTES)  # Run every 15 minutes
+
+# Start the background thread when the app starts
+threading.Thread(target=scheduled_speedtest, daemon=True).start()
 
 if __name__ == '__main__':
     app.run(debug=True)
