@@ -79,5 +79,5 @@ docker compose down
 ### Distribution
 You can download a release archive from GitHub, extract it, and run with Docker Compose locally. No Docker registry required!
 
-## Dockerfile (Advanced/Optional)
-A `Dockerfile` is still included for advanced users, but Docker Compose is the recommended way to run tinybwmon in a container.
+## Note
+Docker Compose is the only supported container method. There is no Dockerfile in this repository.
