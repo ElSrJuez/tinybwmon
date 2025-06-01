@@ -41,7 +41,7 @@ INTERVALS = {
 }
 
 app = Flask(__name__)
-DB_PATH = 'data/speedtest_results.db'
+DB_PATH = '/data/speedtest_results.db'
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
