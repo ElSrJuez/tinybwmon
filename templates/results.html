@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bandwidth Results - {{ interval.replace('_', ' ').title() }}</title>
+    <link rel="stylesheet" href="/static/results.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f7f7fa; margin: 0; padding: 0; }
+        .container { max-width: 900px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #0001; padding: 32px; }
+        h1 { text-align: center; color: #2a3a4a; }
+        .summary { display: flex; justify-content: space-around; margin-bottom: 24px; }
+        .summary div { background: #f0f4f8; border-radius: 8px; padding: 16px 24px; text-align: center; min-width: 120px; }
+        .summary .value { font-size: 2em; font-weight: bold; color: #1a7f37; }
+        .summary .label { color: #555; font-size: 1em; }
+        canvas { margin: 0 auto; display: block; }
+        .footer { text-align: center; color: #888; margin-top: 32px; font-size: 0.95em; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Bandwidth Results<br><span style="font-size:0.6em; color:#888">({{ interval.replace('_', ' ').title() }})</span></h1>
+    <div class="summary" id="summary">
+        <div><div class="value" id="avgDownload">-</div><div class="label">Avg Download (Mbps)</div></div>
+        <div><div class="value" id="avgUpload">-</div><div class="label">Avg Upload (Mbps)</div></div>
+        <div><div class="value" id="avgPing">-</div><div class="label">Avg Ping (ms)</div></div>
+    </div>
+    <canvas id="resultsChart" width="800" height="350"></canvas>
+    <div class="footer">Data updates automatically. <a href="/">Back to Home</a></div>
+</div>
+<script>
+const interval = "{{ interval }}";
+function formatMbps(val) {
+    return val !== null && !isNaN(val) ? val.toLocaleString(undefined, {maximumFractionDigits: 2}) : '-';
+}
+function formatPing(val) {
+    return val !== null && !isNaN(val) ? val.toLocaleString(undefined, {maximumFractionDigits: 1}) : '-';
+}
+async function fetchResults() {
+    const res = await fetch(`/results/${interval}`);
+    return await res.json();
+}
+function updateSummary(results) {
+    if (!results.length) return;
+    let sumDown = 0, sumUp = 0, sumPing = 0;
+    results.forEach(r => {
+        sumDown += r.download;
+        sumUp += r.upload;
+        sumPing += r.ping;
+    });
+    document.getElementById('avgDownload').textContent = formatMbps(sumDown / results.length);
+    document.getElementById('avgUpload').textContent = formatMbps(sumUp / results.length);
+    document.getElementById('avgPing').textContent = formatPing(sumPing / results.length);
+}
+function makeChart(results) {
+    const ctx = document.getElementById('resultsChart').getContext('2d');
+    const labels = results.map(r => new Date(r.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}));
+    const download = results.map(r => r.download);
+    const upload = results.map(r => r.upload);
+    const ping = results.map(r => r.ping);
+    return new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [
+                { label: 'Download (Mbps)', data: download, borderColor: '#1a7f37', backgroundColor: '#1a7f3722', fill: false, tension: 0.2 },
+                { label: 'Upload (Mbps)', data: upload, borderColor: '#1a4a7f', backgroundColor: '#1a4a7f22', fill: false, tension: 0.2 },
+                { label: 'Ping (ms)', data: ping, borderColor: '#e67e22', backgroundColor: '#e67e2222', fill: false, yAxisID: 'y1', tension: 0.2 }
+            ]
+        },
+        options: {
+            responsive: false,
+            scales: {
+                y: { title: { display: true, text: 'Mbps' }, beginAtZero: true },
+                y1: { position: 'right', title: { display: true, text: 'Ping (ms)' }, beginAtZero: true, grid: { drawOnChartArea: false } }
+            },
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: { mode: 'index', intersect: false }
+            }
+        }
+    });
+}
+let chart;
+async function render() {
+    const results = await fetchResults();
+    updateSummary(results);
+    if (chart) chart.destroy();
+    chart = makeChart(results);
+}
+render();
+setInterval(render, 60000); // auto-refresh every minute
+</script>
+</body>
+</html>

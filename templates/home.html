@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>tinybwmon - Bandwidth Monitor</title>
+    <link rel="stylesheet" href="/static/results.css">
+    <style>
+        .main-card { max-width: 700px; margin: 48px auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px #0002; padding: 36px 32px 28px 32px; }
+        h1 { text-align: center; color: #1a4a7f; margin-bottom: 0.2em; }
+        .desc { text-align: center; color: #444; margin-bottom: 1.5em; font-size: 1.15em; }
+        .status { background: #f0f4f8; border-radius: 8px; padding: 18px 24px; margin-bottom: 1.5em; text-align: center; }
+        .status .label { color: #888; font-size: 1em; }
+        .status .value { font-size: 1.5em; font-weight: bold; color: #1a7f37; }
+        .intervals { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; margin-bottom: 1.5em; }
+        .interval-btn { background: #1a4a7f; color: #fff; border: none; border-radius: 6px; padding: 12px 24px; font-size: 1.1em; cursor: pointer; transition: background 0.2s; text-decoration: none; }
+        .interval-btn:hover { background: #15507a; }
+        .actions { text-align: center; margin-bottom: 1.5em; }
+        .actions button { background: #e67e22; color: #fff; border: none; border-radius: 6px; padding: 10px 22px; font-size: 1em; cursor: pointer; transition: background 0.2s; }
+        .actions button:hover { background: #cf711f; }
+        .footer { text-align: center; color: #888; margin-top: 32px; font-size: 0.95em; }
+        .error { color: #c0392b; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="main-card">
+    <h1>tinybwmon</h1>
+    <div class="desc">A minimal, self-hosted bandwidth monitor and charting tool.<br>Runs speed tests automatically and lets you view your internet performance over time.</div>
+    <div class="status" id="status">
+        <div class="label">Last Speed Test</div>
+        <div class="value" id="lastStatus">Loading...</div>
+        <div class="label" style="margin-top:8px;">Next scheduled test in <span id="nextTest">-</span> min</div>
+    </div>
+    <div class="intervals">
+        {% for key, val in intervals.items() %}
+        <a class="interval-btn" href="/view/{{ key }}">View {{ key.replace('_', ' ').title() }}</a>
+        {% endfor %}
+    </div>
+    <div class="actions">
+        <button onclick="runTest()">Run Speed Test Now</button>
+        <span id="runStatus" style="margin-left:16px;"></span>
+    </div>
+    <div class="footer">Open source on <a href="https://github.com/ElSrJuez/tinybwmon" target="_blank">GitHub</a> &mdash; <a href="/results/last_hour" target="_blank">API</a></div>
+</div>
+<script>
+let schedulerInterval = 1;
+async function fetchStatus() {
+    try {
+        const res = await fetch('/results/last_hour');
+        const data = await res.json();
+        if (!Array.isArray(data) || !data.length) {
+            document.getElementById('lastStatus').textContent = 'No data yet';
+            return;
+        }
+        const last = data[data.length-1];
+        const t = new Date(last.timestamp);
+        document.getElementById('lastStatus').textContent =
+            `${t.toLocaleString()} | ↓ ${last.download.toLocaleString(undefined,{maximumFractionDigits:2})} Mbps | ↑ ${last.upload.toLocaleString(undefined,{maximumFractionDigits:2})} Mbps | Ping ${last.ping.toLocaleString(undefined,{maximumFractionDigits:1})} ms`;
+    } catch (e) {
+        document.getElementById('lastStatus').innerHTML = '<span class="error">Error loading status</span>';
+    }
+}
+async function fetchSchedulerInterval() {
+    try {
+        const res = await fetch('/static/scheduler.json');
+        if (res.ok) {
+            const data = await res.json();
+            schedulerInterval = data.test_interval_minutes || 1;
+        }
+    } catch {}
+    document.getElementById('nextTest').textContent = schedulerInterval;
+}
+async function runTest() {
+    const btn = document.querySelector('.actions button');
+    btn.disabled = true;
+    document.getElementById('runStatus').textContent = 'Running...';
+    try {
+        const res = await fetch('/run_test');
+        const data = await res.json();
+        if (data.status === 'ok') {
+            document.getElementById('runStatus').textContent = 'Test complete!';
+            fetchStatus();
+        } else {
+            document.getElementById('runStatus').textContent = 'Error: ' + (data.message || 'Unknown');
+        }
+    } catch (e) {
+        document.getElementById('runStatus').textContent = 'Error running test';
+    }
+    btn.disabled = false;
+}
+fetchStatus();
+fetchSchedulerInterval();
+setInterval(fetchStatus, 60000);
+</script>
+</body>
+</html>

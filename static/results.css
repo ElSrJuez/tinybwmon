@@ -1,0 +1,10 @@
+/* results.css - basic styling for bandwidth results UI */
+body { background: #f7f7fa; }
+.container { box-shadow: 0 2px 8px #0001; border-radius: 10px; background: #fff; }
+h1 { color: #2a3a4a; }
+.summary .value { color: #1a7f37; }
+.summary .label { color: #555; }
+canvas { background: #fff; border-radius: 8px; }
+.footer { color: #888; }
+a { color: #1a4a7f; text-decoration: none; }
+a:hover { text-decoration: underline; }

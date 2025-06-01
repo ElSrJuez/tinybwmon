@@ -3,7 +3,7 @@
 
 import os
 import configparser
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 import sqlite3
 from datetime import datetime, timedelta
 import speedtest
@@ -70,7 +70,7 @@ def insert_result(download, upload, ping):
 
 @app.route('/')
 def home():
-    return '<h1>Bandwidth Monitor</h1><p>Endpoints: /run_test, /results/&lt;interval&gt;</p>'
+    return render_template('home.html', intervals=INTERVALS)
 
 @app.route('/run_test')
 def run_test():
@@ -102,6 +102,16 @@ def get_results(interval):
         for row in rows
     ]
     return jsonify(results)
+
+@app.route('/view/<interval>')
+def view_results(interval):
+    if interval not in INTERVALS:
+        return f"<h2>Invalid interval: {interval}</h2>", 400
+    return render_template('results.html', interval=interval)
+
+@app.route('/static/<path:filename>')
+def static_files(filename):
+    return send_from_directory('static', filename)
 
 def get_scheduler_interval():
     env_val = os.getenv('TEST_INTERVAL_MINUTES')
