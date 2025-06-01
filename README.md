@@ -60,23 +60,24 @@ Contributions are welcome! Please open issues or pull requests for bug fixes, fe
 ## License
 MIT
 
-## Docker Usage
-You can build and run tinybwmon in a Docker container. No Docker registry required—just build from source or use a GitHub release zip/tarball!
+## Docker Compose Usage (Recommended)
+You can run tinybwmon easily using Docker Compose. This will build the image and run the app with persistent storage for your database.
 
-### Build the Docker image
+### Start the app
 ```sh
-docker build -t tinybwmon .
-```
-
-### Run the container
-```sh
-docker run -d -p 42042:42042 --name tinybwmon \
-  -v $(pwd)/speedtest_results.db:/app/speedtest_results.db \
-  tinybwmon
+docker compose up -d
 ```
 
 - The app will be available at [http://localhost:42042](http://localhost:42042)
 - The database file is persisted to your host for data durability.
 
+### Stop the app
+```sh
+docker compose down
+```
+
 ### Distribution
-You can download a release archive from GitHub, extract it, and build the Docker image locally. No Docker registry required!
+You can download a release archive from GitHub, extract it, and run with Docker Compose locally. No Docker registry required!
+
+## Dockerfile (Advanced/Optional)
+A `Dockerfile` is still included for advanced users, but Docker Compose is the recommended way to run tinybwmon in a container.
