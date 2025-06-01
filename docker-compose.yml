@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  tinybwmon:
+    build: .
+    container_name: tinybwmon
+    ports:
+      - "42042:42042"
+    volumes:
+      - ./speedtest_results.db:/app/speedtest_results.db
+    environment:
+      - FLASK_APP=main.py
+      - FLASK_RUN_PORT=42042
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
